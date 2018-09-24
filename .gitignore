@@ -1,3 +1,5 @@
 *.lines
+*.zip
 tags
 rM
+cmd/rm/rm
