@@ -47,7 +47,7 @@ func (n *Notebook) parseLines(r io.Reader) error {
 		return err
 	}
 
-	var pages []page
+	var pages []Page
 
 	for pidx := uint32(1); pidx <= nbPages; pidx++ {
 
@@ -57,7 +57,7 @@ func (n *Notebook) parseLines(r io.Reader) error {
 			return err
 		}
 
-		var layers []layer
+		var layers []Layer
 
 		for lyidx := uint32(1); lyidx <= nbLayers; lyidx++ {
 			// Get number of lines
@@ -66,7 +66,7 @@ func (n *Notebook) parseLines(r io.Reader) error {
 				return err
 			}
 
-			var lines []line
+			var lines []Line
 
 			for lidx := uint32(1); lidx <= nbLines; lidx++ {
 				brshType, err := readInt32(r)
@@ -95,7 +95,7 @@ func (n *Notebook) parseLines(r io.Reader) error {
 					return err
 				}
 
-				var points []point
+				var points []Point
 
 				for ptidx := uint32(1); ptidx <= nbPoints; ptidx++ {
 					x, err := readFloat32(r)
@@ -123,25 +123,25 @@ func (n *Notebook) parseLines(r io.Reader) error {
 						return err
 					}
 
-					points = append(points, point{x, y, penPressure, xRotation, yRotation})
+					points = append(points, Point{x, y, penPressure, xRotation, yRotation})
 				}
 
-				lines = append(lines, line{
-					brushType(brshType),
-					brushColor(brshColor),
-					brushSize(brshSize),
+				lines = append(lines, Line{
+					BrushType(brshType),
+					BrushColor(brshColor),
+					BrushSize(brshSize),
 					points,
 				})
 
 			}
 
-			layers = append(layers, layer{lines})
+			layers = append(layers, Layer{lines})
 		}
 
-		pages = append(pages, page{layers})
+		pages = append(pages, Page{layers})
 	}
 
-	n.pages = pages
+	n.Pages = pages
 	return nil
 }
 
@@ -160,7 +160,7 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 	if err != nil {
 		return nil, err
 	}
-	notebook.hash = h
+	notebook.Hash = h
 
 	// Search for lines file
 	for _, zf := range r.File {
@@ -178,11 +178,11 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 			}
 
 			// Set id
-			notebook.id = strings.TrimSuffix(name, ext)
+			notebook.Id = strings.TrimSuffix(name, ext)
 			break
 		}
 	}
-	if len(notebook.pages) == 0 {
+	if len(notebook.Pages) == 0 {
 		return nil, errors.New("Notebook does not contain data")
 	}
 
@@ -201,7 +201,7 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 			if err != nil {
 				return nil, err
 			}
-			json.Unmarshal(b, &notebook.content)
+			json.Unmarshal(b, &notebook.Content)
 		}
 	}
 

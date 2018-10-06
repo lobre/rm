@@ -10,63 +10,63 @@ const (
 	Height int = 1872
 )
 
-type brushColor int
-type brushType int
-type brushSize float32
+type BrushColor int
+type BrushType int
+type BrushSize float32
 
 // Brush colors
 const (
-	black brushColor = 0
-	grey  brushColor = 1
-	white brushColor = 2
+	Black BrushColor = 0
+	Grey  BrushColor = 1
+	White BrushColor = 2
 )
 
 // Brush types
 const (
-	brush       brushType = 0
-	pencilTilt  brushType = 1
-	pen         brushType = 2
-	marker      brushType = 3
-	fineliner   brushType = 4
-	highlighter brushType = 5
-	eraser      brushType = 6
-	pencilSharp brushType = 7
-	eraseArea   brushType = 8
+	Brush       BrushType = 0
+	PencilTilt  BrushType = 1
+	Pen         BrushType = 2
+	Marker      BrushType = 3
+	Fineliner   BrushType = 4
+	Highlighter BrushType = 5
+	Eraser      BrushType = 6
+	PencilSharp BrushType = 7
+	EraseArea   BrushType = 8
 )
 
 // Brush sizes
 const (
-	small  brushSize = 1.875
-	medium brushSize = 2.0
-	large  brushSize = 2.125
+	Small  BrushSize = 1.875
+	Medium BrushSize = 2.0
+	Large  BrushSize = 2.125
 )
 
-type point struct {
-	x           float32
-	y           float32
-	penPressure float32
-	xRotation   float32
-	yRotation   float32
+type Point struct {
+	X           float32
+	Y           float32
+	PenPressure float32
+	XRotation   float32
+	YRotation   float32
 }
 
-type line struct {
-	brushType  brushType
-	brushColor brushColor
-	brushSize  brushSize
-	points     []point
+type Line struct {
+	BrushType  BrushType
+	BrushColor BrushColor
+	BrushSize  BrushSize
+	Points     []Point
 }
 
-type layer struct {
-	lines []line
+type Layer struct {
+	Lines []Line
 }
 
-type page struct {
-	layers []layer
+type Page struct {
+	Layers []Layer
 	//template  string
 	//thumbnail image.Image
 }
 
-type contentTransform struct {
+type ContentTransform struct {
 	M11 int `json:"m11"`
 	M12 int `json:"m12"`
 	M13 int `json:"m13"`
@@ -78,14 +78,14 @@ type contentTransform struct {
 	M33 int `json:"m33"`
 }
 
-type contentExtraMetadata struct {
+type ContentExtraMetadata struct {
 	LastColor      string `json:"LastColor"`
 	LastTool       string `json:"LastTool"`
 	ThicknessScale string `json:"ThicknessScale"`
 }
 
-type content struct {
-	ExtraMetadata  contentExtraMetadata `json:"extraMetadata"`
+type Content struct {
+	ExtraMetadata  ContentExtraMetadata `json:"extraMetadata"`
 	FileType       string               `json:"fileType"`
 	FontName       string               `json:"fontName"`
 	LastOpenedPage int                  `json:"lastOpenedPage"`
@@ -93,19 +93,19 @@ type content struct {
 	Margins        int                  `json:"margins"`
 	PageCount      int                  `json:"pageCount"`
 	TextScale      int                  `json:"textScale"`
-	Transform      contentTransform     `json:"transform"`
+	Transform      ContentTransform     `json:"transform"`
 }
 
 // Notebook parsed from the reMarkable
 type Notebook struct {
 	Name string
 
-	id      string
-	pages   []page
-	content content
-	pdf     os.File
-	epub    os.File
-	hash    string
+	Id      string
+	Pages   []Page
+	Content Content
+	Pdf     os.File
+	Epub    os.File
+	Hash    string
 }
 
 const header = "reMarkable lines with selections and layers"

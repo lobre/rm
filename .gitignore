@@ -2,4 +2,6 @@
 *.zip
 !examples/Test.zip
 tags
-rM
+*.png
+*.pdf
+*.svg
