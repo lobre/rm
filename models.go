@@ -1,6 +1,7 @@
 package rm
 
 import (
+	"image"
 	"os"
 )
 
@@ -61,9 +62,9 @@ type Layer struct {
 }
 
 type Page struct {
-	Layers []Layer
-	//template  string
-	//thumbnail image.Image
+	Layers    []Layer
+	Template  string
+	thumbnail image.Image
 }
 
 type ContentTransform struct {
@@ -79,9 +80,18 @@ type ContentTransform struct {
 }
 
 type ContentExtraMetadata struct {
-	LastColor      string `json:"LastColor"`
-	LastTool       string `json:"LastTool"`
-	ThicknessScale string `json:"ThicknessScale"`
+	LastBrushColor           string `json:"LastBrushColor"`
+	LastBrushThicknessScale  string `json:"LastBrushThicknessScale"`
+	LastColor                string `json:"LastColor"`
+	LastEraserThicknessScale string `json:"LastEraserThicknessScale"`
+	LastPen                  string `json:"LastPen"`
+	LastPenColor             string `json:"LastPenColor"`
+	LastPenThicknessScale    string `json:"LastPenThicknessScale"`
+	LastPencil               string `json:"LastPencil"`
+	LastPencilColor          string `json:"LastPencilColor"`
+	LastPencilThicknessScale string `json:"LastPencilThicknessScale"`
+	LastTool                 string `json:"LastTool"`
+	ThicknessScale           string `json:"ThicknessScale"`
 }
 
 type Content struct {
@@ -98,14 +108,21 @@ type Content struct {
 
 // Notebook parsed from the reMarkable
 type Notebook struct {
-	Name string
-
-	Id      string
+	Name    string
+	UUID    string
 	Pages   []Page
 	Content Content
-	Pdf     os.File
-	Epub    os.File
 	Hash    string
+
+	pdf  os.File
+	epub os.File
 }
 
 const header = "reMarkable lines with selections and layers"
+
+// IsValid returns whether the notebook contains enough data
+// to be correctly read by the reMarkable tablet
+func (n *Notebook) IsValid() bool {
+	// TODO
+	return true
+}

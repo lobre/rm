@@ -18,13 +18,13 @@ func TestNewNotebook(t *testing.T) {
 	}
 
 	// Test notebook hash
-	if n.hash != "01fb883ad1d03543b44ae43a4ce23d51" {
+	if n.Hash != "f10aa4b9d09e43c0765e8284a4f9bb65" {
 		t.Errorf("Notebook hash is not correct")
 	}
 
 	// Test notebook content file
-	if n.content.ExtraMetadata.LastTool != "Fineliner" {
-		t.Errorf("Wrong content lasttool read")
+	if n.Content.ExtraMetadata.LastTool != "SharpPencil" {
+		t.Errorf("Wrong LastTool read")
 	}
 }
 
