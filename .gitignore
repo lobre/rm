@@ -1,5 +1,5 @@
 *.lines
 *.zip
+!examples/Test.zip
 tags
 rM
-cmd/rm/rm

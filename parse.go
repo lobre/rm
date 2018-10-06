@@ -2,13 +2,14 @@ package rm
 
 import (
 	"archive/zip"
-	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -145,13 +146,21 @@ func (n *Notebook) parseLines(r io.Reader) error {
 }
 
 func NewNotebook(zipFile string) (*Notebook, error) {
-	name := strings.TrimSuffix(zipFile, filepath.Ext(zipFile))
+	name := filepath.Base(strings.TrimSuffix(zipFile, filepath.Ext(zipFile)))
 	notebook := Notebook{Name: name}
 
 	r, err := zip.OpenReader(zipFile)
 	if err != nil {
 		return nil, err
 	}
+
+	// Calculate zip hash
+	fr, err := os.Open(zipFile)
+	h, err := md5Hash(fr)
+	if err != nil {
+		return nil, err
+	}
+	notebook.hash = h
 
 	// Search for lines file
 	for _, zf := range r.File {
@@ -188,10 +197,11 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 				return nil, err
 			}
 			defer f.Close()
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(f)
-			buf.Bytes()
-			json.Unmarshal(buf.Bytes(), &notebook.content)
+			b, err := ioutil.ReadAll(f)
+			if err != nil {
+				return nil, err
+			}
+			json.Unmarshal(b, &notebook.content)
 		}
 	}
 

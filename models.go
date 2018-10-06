@@ -1,10 +1,10 @@
 package rm
 
 import (
-	"image"
 	"os"
 )
 
+// Width and Height of the device
 const (
 	Width  int = 1404
 	Height int = 1872
@@ -61,9 +61,39 @@ type layer struct {
 }
 
 type page struct {
-	layers    []layer
-	template  string
-	thumbnail image.Image
+	layers []layer
+	//template  string
+	//thumbnail image.Image
+}
+
+type contentTransform struct {
+	M11 int `json:"m11"`
+	M12 int `json:"m12"`
+	M13 int `json:"m13"`
+	M21 int `json:"m21"`
+	M22 int `json:"m22"`
+	M23 int `json:"m23"`
+	M31 int `json:"m31"`
+	M32 int `json:"m32"`
+	M33 int `json:"m33"`
+}
+
+type contentExtraMetadata struct {
+	LastColor      string `json:"LastColor"`
+	LastTool       string `json:"LastTool"`
+	ThicknessScale string `json:"ThicknessScale"`
+}
+
+type content struct {
+	ExtraMetadata  contentExtraMetadata `json:"extraMetadata"`
+	FileType       string               `json:"fileType"`
+	FontName       string               `json:"fontName"`
+	LastOpenedPage int                  `json:"lastOpenedPage"`
+	LineHeight     int                  `json:"lineHeight"`
+	Margins        int                  `json:"margins"`
+	PageCount      int                  `json:"pageCount"`
+	TextScale      int                  `json:"textScale"`
+	Transform      contentTransform     `json:"transform"`
 }
 
 // Notebook parsed from the reMarkable
@@ -72,9 +102,10 @@ type Notebook struct {
 
 	id      string
 	pages   []page
-	content map[string]interface{}
+	content content
 	pdf     os.File
 	epub    os.File
+	hash    string
 }
 
 const header = "reMarkable lines with selections and layers"
