@@ -22,9 +22,29 @@ func TestNewNotebook(t *testing.T) {
 		t.Errorf("Notebook hash is not correct")
 	}
 
+	// Test number of pages
+	if len(n.Pages) != 3 {
+		t.Errorf("Wrong number of pages")
+	}
+
 	// Test notebook content file
 	if n.Content.ExtraMetadata.LastTool != "SharpPencil" {
 		t.Errorf("Wrong LastTool read")
+	}
+
+	// Test pagedata
+	if n.Pages[0].Template != "Blank" {
+		t.Errorf("Wrong template for page one")
+	}
+
+	// Test pdf extract
+	if err := n.ExtractPdf("examples/Test.pdf"); err != nil {
+		t.Errorf("Cannot extract pdf: %v", err)
+	}
+
+	// Test thumbnail extract
+	if err := n.ExtractThumbnail(0, "examples/Thumb.jpg"); err != nil {
+		t.Errorf("Cannot extract thumbnail: %v", err)
 	}
 }
 

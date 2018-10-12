@@ -1,10 +1,5 @@
 package rm
 
-import (
-	"image"
-	"os"
-)
-
 // Width and Height of the device
 const (
 	Width  int = 1404
@@ -64,7 +59,7 @@ type Layer struct {
 type Page struct {
 	Layers    []Layer
 	Template  string
-	thumbnail image.Image
+	thumbnail []byte
 }
 
 type ContentTransform struct {
@@ -114,8 +109,8 @@ type Notebook struct {
 	Content Content
 	Hash    string
 
-	pdf  os.File
-	epub os.File
+	pdf  []byte
+	epub []byte
 }
 
 const header = "reMarkable lines with selections and layers"

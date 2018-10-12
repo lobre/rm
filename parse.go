@@ -2,6 +2,7 @@ package rm
 
 import (
 	"archive/zip"
+	"bufio"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -177,23 +179,68 @@ func (n *Notebook) parseContent(r io.Reader) error {
 	return nil
 }
 
-// TODO
 func (n *Notebook) parsePagedata(r io.Reader) error {
+	var templates []string
+
+	s := bufio.NewScanner(r)
+	for i := 0; s.Scan() && i < len(n.Pages); i++ {
+		templates = append(templates, s.Text())
+		n.Pages[i].Template = s.Text()
+	}
+
+	if err := s.Err(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// TODO
 func (n *Notebook) parsePdf(r io.Reader) error {
+	var err error
+	n.pdf, err = ioutil.ReadAll(r)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-// TODO
 func (n *Notebook) parseEpub(r io.Reader) error {
+	var err error
+	n.epub, err = ioutil.ReadAll(r)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-// TODO
-func (n *Notebook) parseThumbnails(zf []*zip.File) error {
+func (n *Notebook) parseThumbnails(files []*zip.File) error {
+	for _, zf := range files {
+		name := zf.FileInfo().Name()
+
+		// Only look for thumbnail files
+		if filepath.Ext(name) != ".jpg" {
+			continue
+		}
+
+		// Name of file corresponds to index
+		i, err := strconv.Atoi(fileRawName(name))
+		if err != nil {
+			return err
+		}
+
+		if i < len(n.Pages) {
+			f, err := zf.Open()
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			n.Pages[i].thumbnail, err = ioutil.ReadAll(f)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -250,6 +297,39 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 		if err := notebook.parseContent(f); err != nil {
 			return &notebook, fmt.Errorf("Can't parse content file: %v", err)
 		}
+	}
+
+	// Process pagedata file
+	zf = zipSearchExt(".pagedata", zr.File)
+	if zf != nil {
+		f, err := zf.Open()
+		if err != nil {
+			return &notebook, err
+		}
+		defer f.Close()
+
+		if err := notebook.parsePagedata(f); err != nil {
+			return &notebook, fmt.Errorf("Can't parse pagedata file: %v", err)
+		}
+	}
+
+	// Process pdf file
+	zf = zipSearchExt(".pdf", zr.File)
+	if zf != nil {
+		f, err := zf.Open()
+		if err != nil {
+			return &notebook, err
+		}
+		defer f.Close()
+
+		if err := notebook.parsePdf(f); err != nil {
+			return &notebook, fmt.Errorf("Can't parse pdf file: %v", err)
+		}
+	}
+
+	// Process thumbnails
+	if err := notebook.parseThumbnails(zr.File); err != nil {
+		return &notebook, err
 	}
 
 	return &notebook, nil

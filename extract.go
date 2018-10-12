@@ -1,16 +1,33 @@
 package rm
 
-func (n *Notebook) ExtractPdf() error {
-	// TODO
+import (
+	"fmt"
+	"io/ioutil"
+)
+
+func (n *Notebook) ExtractPdf(path string) error {
+	if err := ioutil.WriteFile(path, n.pdf, 0644); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (n *Notebook) ExtractEpub() error {
-	// TODO
+func (n *Notebook) ExtractEpub(path string) error {
+	if err := ioutil.WriteFile(path, n.epub, 0644); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (n *Notebook) ExtractThumbnail(pageIdx int) error {
-	// TODO
+func (n *Notebook) ExtractThumbnail(i int, path string) error {
+	if i >= len(n.Pages) {
+		return fmt.Errorf("Page does not exist")
+	}
+	if n.Pages[i].thumbnail == nil {
+		return fmt.Errorf("Page thumbnail does not exist")
+	}
+	if err := ioutil.WriteFile(path, n.Pages[i].thumbnail, 0644); err != nil {
+		return err
+	}
 	return nil
 }
