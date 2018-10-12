@@ -1,4 +1,4 @@
-package rm
+package notebook
 
 import (
 	"strings"

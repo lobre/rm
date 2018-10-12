@@ -1,4 +1,4 @@
-package rm
+package notebook
 
 // Width and Height of the device
 const (
@@ -114,10 +114,3 @@ type Notebook struct {
 }
 
 const header = "reMarkable lines with selections and layers"
-
-// IsValid returns whether the notebook contains enough data
-// to be correctly read by the reMarkable tablet
-func (n *Notebook) IsValid() bool {
-	// TODO
-	return true
-}

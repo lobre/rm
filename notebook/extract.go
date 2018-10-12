@@ -1,4 +1,4 @@
-package rm
+package notebook
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func (n *Notebook) ExtractThumbnail(i int, path string) error {
 		return fmt.Errorf("Page does not exist")
 	}
 	if n.Pages[i].thumbnail == nil {
-		return fmt.Errorf("Page thumbnail does not exist")
+		return fmt.Errorf("No thumbnail for this page")
 	}
 	if err := ioutil.WriteFile(path, n.Pages[i].thumbnail, 0644); err != nil {
 		return err

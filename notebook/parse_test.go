@@ -1,4 +1,4 @@
-package rm
+package notebook
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 func TestNewNotebook(t *testing.T) {
 	// Parse notebook
-	n, err := NewNotebook("examples/Test.zip")
+	n, err := NewNotebook("../examples/Test.zip")
 	if err != nil {
 		t.Errorf("Impossible to parse notebook: %v", err)
 	}
@@ -38,18 +38,18 @@ func TestNewNotebook(t *testing.T) {
 	}
 
 	// Test pdf extract
-	if err := n.ExtractPdf("examples/Test.pdf"); err != nil {
+	if err := n.ExtractPdf("../examples/Test.pdf"); err != nil {
 		t.Errorf("Cannot extract pdf: %v", err)
 	}
 
 	// Test thumbnail extract
-	if err := n.ExtractThumbnail(0, "examples/Thumb.jpg"); err != nil {
+	if err := n.ExtractThumbnail(0, "../examples/Thumb.jpg"); err != nil {
 		t.Errorf("Cannot extract thumbnail: %v", err)
 	}
 }
 
 func ExampleNewNotebook() {
-	fileName := "examples/Test.zip"
+	fileName := "../examples/Test.zip"
 	notebook, _ := NewNotebook(fileName)
 	fmt.Println(notebook.Name)
 	// Output:
