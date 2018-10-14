@@ -59,7 +59,7 @@ type Layer struct {
 type Page struct {
 	Layers    []Layer
 	Template  string
-	thumbnail []byte
+	Thumbnail []byte
 }
 
 type ContentTransform struct {
@@ -109,8 +109,14 @@ type Notebook struct {
 	Content Content
 	Hash    string
 
-	pdf  []byte
-	epub []byte
+	Pdf  []byte
+	Epub []byte
 }
 
 const header = "reMarkable lines with selections and layers"
+
+// TODO set all default values as set
+// on rM tablet for a new empty note
+func New() *Notebook {
+	return &Notebook{}
+}

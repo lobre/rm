@@ -3,6 +3,8 @@ package notebook
 import (
 	"fmt"
 	"image"
+	"io/ioutil"
+	"os"
 
 	"github.com/llgcode/draw2d"
 	"github.com/llgcode/draw2d/draw2dimg"
@@ -10,7 +12,9 @@ import (
 	"github.com/llgcode/draw2d/draw2dsvg"
 )
 
-func (n *Notebook) DrawPng() error {
+func (n *Notebook) DrawPng() ([]byte, error) {
+	var f []byte
+
 	// Initialize the graphic context on an RGBA image
 	dest := image.NewRGBA(image.Rect(0, 0, Width, Height))
 	gc := draw2dimg.NewGraphicContext(dest)
@@ -18,20 +22,35 @@ func (n *Notebook) DrawPng() error {
 	// Draw content
 	err := draw(gc)
 	if err != nil {
-		return err
+		return f, err
 	}
+
+	// Generate tmp file
+	fn := fmt.Sprintf("%s.png", n.Name)
+	tmp, err := ioutil.TempFile("", fn)
+	if err != nil {
+		return f, err
+	}
+	defer os.Remove(tmp.Name())
 
 	// Save to png
-	fn := fmt.Sprintf("%s.png", n.Name)
-	err = draw2dimg.SaveToPngFile(fn, dest)
+	err = draw2dimg.SaveToPngFile(tmp.Name(), dest)
 	if err != nil {
-		return err
+		return f, err
 	}
 
-	return nil
+	// Get bytes from tmp file
+	f, err = ioutil.ReadFile(tmp.Name())
+	if err != nil {
+		return f, err
+	}
+
+	return f, nil
 }
 
-func (n *Notebook) DrawPdf() error {
+func (n *Notebook) DrawPdf() ([]byte, error) {
+	var f []byte
+
 	// Initialize the graphic context on a pdf document
 	dest := draw2dpdf.NewPdf("L", "mm", "A4")
 	gc := draw2dpdf.NewGraphicContext(dest)
@@ -39,20 +58,35 @@ func (n *Notebook) DrawPdf() error {
 	// Draw content
 	err := draw(gc)
 	if err != nil {
-		return err
+		return f, err
 	}
 
-	// Save to png
+	// Generate tmp file
 	fn := fmt.Sprintf("%s.pdf", n.Name)
-	err = draw2dpdf.SaveToPdfFile(fn, dest)
+	tmp, err := ioutil.TempFile("", fn)
 	if err != nil {
-		return err
+		return f, err
+	}
+	defer os.Remove(tmp.Name())
+
+	// Save to pdf
+	err = draw2dpdf.SaveToPdfFile(tmp.Name(), dest)
+	if err != nil {
+		return f, err
 	}
 
-	return nil
+	// Get bytes from tmp file
+	f, err = ioutil.ReadFile(tmp.Name())
+	if err != nil {
+		return f, err
+	}
+
+	return f, nil
 }
 
-func (n *Notebook) DrawSvg() error {
+func (n *Notebook) DrawSvg() ([]byte, error) {
+	var f []byte
+
 	// Initialize the graphic context on an pdf document
 	dest := draw2dsvg.NewSvg()
 	gc := draw2dsvg.NewGraphicContext(dest)
@@ -60,17 +94,30 @@ func (n *Notebook) DrawSvg() error {
 	// Draw content
 	err := draw(gc)
 	if err != nil {
-		return err
+		return f, err
 	}
+
+	// Generate tmp file
+	fn := fmt.Sprintf("%s.svg", n.Name)
+	tmp, err := ioutil.TempFile("", fn)
+	if err != nil {
+		return f, err
+	}
+	defer os.Remove(tmp.Name())
 
 	// Save to png
-	fn := fmt.Sprintf("%s.svg", n.Name)
-	err = draw2dsvg.SaveToSvgFile(fn, dest)
+	err = draw2dsvg.SaveToSvgFile(tmp.Name(), dest)
 	if err != nil {
-		return err
+		return f, err
 	}
 
-	return nil
+	// Get bytes from tmp file
+	f, err = ioutil.ReadFile(tmp.Name())
+	if err != nil {
+		return f, err
+	}
+
+	return f, nil
 }
 
 func draw(gc draw2d.GraphicContext) error {

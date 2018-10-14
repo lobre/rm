@@ -10,7 +10,6 @@ import (
 	"io"
 	"io/ioutil"
 	"math"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -33,7 +32,7 @@ func readFloat32(r io.Reader) (float32, error) {
 	return math.Float32frombits(bits), nil
 }
 
-func (n *Notebook) parseLines(r io.Reader) error {
+func (n *Notebook) decodeLines(r io.Reader) error {
 	log.Debug("START PARSING LINES FILE")
 	log.Debug("--------------")
 
@@ -170,7 +169,7 @@ func (n *Notebook) parseLines(r io.Reader) error {
 	return nil
 }
 
-func (n *Notebook) parseContent(r io.Reader) error {
+func (n *Notebook) decodeContent(r io.Reader) error {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
@@ -179,7 +178,7 @@ func (n *Notebook) parseContent(r io.Reader) error {
 	return nil
 }
 
-func (n *Notebook) parsePagedata(r io.Reader) error {
+func (n *Notebook) decodePagedata(r io.Reader) error {
 	var templates []string
 
 	s := bufio.NewScanner(r)
@@ -195,25 +194,25 @@ func (n *Notebook) parsePagedata(r io.Reader) error {
 	return nil
 }
 
-func (n *Notebook) parsePdf(r io.Reader) error {
+func (n *Notebook) decodePdf(r io.Reader) error {
 	var err error
-	n.pdf, err = ioutil.ReadAll(r)
+	n.Pdf, err = ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (n *Notebook) parseEpub(r io.Reader) error {
+func (n *Notebook) decodeEpub(r io.Reader) error {
 	var err error
-	n.epub, err = ioutil.ReadAll(r)
+	n.Epub, err = ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (n *Notebook) parseThumbnails(files []*zip.File) error {
+func (n *Notebook) decodeThumbnails(files []*zip.File) error {
 	for _, zf := range files {
 		name := zf.FileInfo().Name()
 
@@ -235,7 +234,7 @@ func (n *Notebook) parseThumbnails(files []*zip.File) error {
 			}
 			defer f.Close()
 
-			n.Pages[i].thumbnail, err = ioutil.ReadAll(f)
+			n.Pages[i].Thumbnail, err = ioutil.ReadAll(f)
 			if err != nil {
 				return err
 			}
@@ -244,44 +243,33 @@ func (n *Notebook) parseThumbnails(files []*zip.File) error {
 	return nil
 }
 
-func NewNotebook(zipFile string) (*Notebook, error) {
-	notebook := Notebook{}
-
-	// Get name from zip filename
-	notebook.Name = fileRawName(zipFile)
-
-	// Calculate zip hash
-	fr, err := os.Open(zipFile)
-	h, err := md5Hash(fr)
-	if err != nil {
-		return nil, err
-	}
-	notebook.Hash = h
+func (n *Notebook) Decode(r io.ReaderAt, size int64, name string) error {
+	n.Name = name
 
 	// Get zip file reader
-	zr, err := zip.OpenReader(zipFile)
+	zr, err := zip.NewReader(r, size)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Make sure zip contains files and register uuid
 	zf := zipFirstFile(zr.File)
 	if zf == nil {
-		return nil, fmt.Errorf("No file in zip")
+		return fmt.Errorf("No file in zip")
 	}
-	notebook.UUID = fileRawName(zf.FileInfo().Name())
+	n.UUID = fileRawName(zf.FileInfo().Name())
 
 	// Process lines file
 	zf = zipSearchExt(".lines", zr.File)
 	if zf != nil {
 		f, err := zf.Open()
 		if err != nil {
-			return &notebook, err
+			return err
 		}
 		defer f.Close()
 
-		if err := notebook.parseLines(f); err != nil {
-			return &notebook, fmt.Errorf("Can't parse lines file: %v", err)
+		if err := n.decodeLines(f); err != nil {
+			return fmt.Errorf("Can't parse lines file: %v", err)
 		}
 	}
 
@@ -290,12 +278,12 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 	if zf != nil {
 		f, err := zf.Open()
 		if err != nil {
-			return &notebook, err
+			return err
 		}
 		defer f.Close()
 
-		if err := notebook.parseContent(f); err != nil {
-			return &notebook, fmt.Errorf("Can't parse content file: %v", err)
+		if err := n.decodeContent(f); err != nil {
+			return fmt.Errorf("Can't parse content file: %v", err)
 		}
 	}
 
@@ -304,12 +292,12 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 	if zf != nil {
 		f, err := zf.Open()
 		if err != nil {
-			return &notebook, err
+			return err
 		}
 		defer f.Close()
 
-		if err := notebook.parsePagedata(f); err != nil {
-			return &notebook, fmt.Errorf("Can't parse pagedata file: %v", err)
+		if err := n.decodePagedata(f); err != nil {
+			return fmt.Errorf("Can't parse pagedata file: %v", err)
 		}
 	}
 
@@ -318,21 +306,35 @@ func NewNotebook(zipFile string) (*Notebook, error) {
 	if zf != nil {
 		f, err := zf.Open()
 		if err != nil {
-			return &notebook, err
+			return err
 		}
 		defer f.Close()
 
-		if err := notebook.parsePdf(f); err != nil {
-			return &notebook, fmt.Errorf("Can't parse pdf file: %v", err)
+		if err := n.decodePdf(f); err != nil {
+			return fmt.Errorf("Can't parse pdf file: %v", err)
+		}
+	}
+
+	// Process epub file
+	zf = zipSearchExt(".epub", zr.File)
+	if zf != nil {
+		f, err := zf.Open()
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if err := n.decodeEpub(f); err != nil {
+			return fmt.Errorf("Can't parse epub file: %v", err)
 		}
 	}
 
 	// Process thumbnails
-	if err := notebook.parseThumbnails(zr.File); err != nil {
-		return &notebook, err
+	if err := n.decodeThumbnails(zr.File); err != nil {
+		return err
 	}
 
-	return &notebook, nil
+	return nil
 }
 
 // Search a particular file with given extension in a zip
