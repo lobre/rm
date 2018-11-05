@@ -20,7 +20,7 @@ func (n *Notebook) DrawPng() ([]byte, error) {
 	gc := draw2dimg.NewGraphicContext(dest)
 
 	// Draw content
-	err := draw(gc)
+	err := n.draw(gc)
 	if err != nil {
 		return f, err
 	}
@@ -56,7 +56,7 @@ func (n *Notebook) DrawPdf() ([]byte, error) {
 	gc := draw2dpdf.NewGraphicContext(dest)
 
 	// Draw content
-	err := draw(gc)
+	err := n.draw(gc)
 	if err != nil {
 		return f, err
 	}
@@ -92,7 +92,7 @@ func (n *Notebook) DrawSvg() ([]byte, error) {
 	gc := draw2dsvg.NewGraphicContext(dest)
 
 	// Draw content
-	err := draw(gc)
+	err := n.draw(gc)
 	if err != nil {
 		return f, err
 	}
@@ -120,6 +120,6 @@ func (n *Notebook) DrawSvg() ([]byte, error) {
 	return f, nil
 }
 
-func draw(gc draw2d.GraphicContext) error {
+func (n *Notebook) draw(gc draw2d.GraphicContext) error {
 	return nil
 }

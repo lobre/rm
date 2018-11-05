@@ -117,6 +117,6 @@ const header = "reMarkable lines with selections and layers"
 
 // TODO set all default values as set
 // on rM tablet for a new empty note
-func New() *Notebook {
-	return &Notebook{}
+func New(n string) *Notebook {
+	return &Notebook{Name: n}
 }

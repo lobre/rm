@@ -11,7 +11,7 @@ import (
 
 func TestDecode(t *testing.T) {
 	// Open file
-	f, err := os.Open("../examples/Test.zip")
+	f, err := os.Open("examples/Test.zip")
 	if err != nil {
 		t.Errorf("Can't open file")
 	}
@@ -52,7 +52,7 @@ func TestDecode(t *testing.T) {
 
 func ExampleNew() {
 	// Open file
-	f, err := os.Open("../examples/Test.zip")
+	f, err := os.Open("examples/Test.zip")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,8 +63,8 @@ func ExampleNew() {
 	}
 
 	// Decode zip notebook
-	n := notebook.New()
-	err = n.Decode(f, fi.Size(), "Test")
+	n := notebook.New("Test")
+	err = n.Decode(f, fi.Size())
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -10,7 +10,7 @@ import (
 
 func TestDrawPng(t *testing.T) {
 	// Open file
-	f, err := os.Open("../examples/Test.zip")
+	f, err := os.Open("examples/Test.zip")
 	if err != nil {
 		t.Error(err)
 	}
@@ -21,8 +21,8 @@ func TestDrawPng(t *testing.T) {
 	}
 
 	// Decode zip notebook
-	n := notebook.New()
-	err = n.Decode(f, fi.Size(), "Test")
+	n := notebook.New("Test")
+	err = n.Decode(f, fi.Size())
 	if err != nil {
 		t.Error(err)
 	}
@@ -34,7 +34,7 @@ func TestDrawPng(t *testing.T) {
 	}
 
 	// Write png to file
-	if err = ioutil.WriteFile("../examples/Test.png", b, 0644); err != nil {
+	if err = ioutil.WriteFile("examples/Test.png", b, 0644); err != nil {
 		t.Error(err)
 	}
 }

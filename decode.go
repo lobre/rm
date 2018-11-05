@@ -243,9 +243,7 @@ func (n *Notebook) decodeThumbnails(files []*zip.File) error {
 	return nil
 }
 
-func (n *Notebook) Decode(r io.ReaderAt, size int64, name string) error {
-	n.Name = name
-
+func (n *Notebook) Decode(r io.ReaderAt, size int64) error {
 	// Get zip file reader
 	zr, err := zip.NewReader(r, size)
 	if err != nil {
